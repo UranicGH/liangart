@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArtworkCard from '../components/ArtworkCard.astro';
+import ProgramCard from '../components/ProgramCard.astro';
+import TuitionCards from '../components/TuitionCards.astro';
+import { getFeaturedArtwork, getPrograms, getSiteSettings, getPrimaryTuition } from '../lib/content';
+
+const [artwork, programs, settings, tuition] = await Promise.all([
+  getFeaturedArtwork(6),
+  getPrograms(),
+  getSiteSettings(),
+  getPrimaryTuition(),
+]);
+const primaryProgram = programs.find((program) => program.primaryProgram) || programs[0];
+const secondaryPrograms = programs.filter((program) => program.id !== primaryProgram?.id);
+---
+<BaseLayout>
+  <section class="home-intro section-pad">
+    <div class="home-intro-copy">
+      <p class="eyebrow">Liang Art Studio</p>
+      <h1>Liang Art Studio</h1>
+      <p class="home-tagline">{settings.tagline}</p>
+      <div class="button-row">
+        <a class="button primary" href="/gallery">Student Gallery</a>
+        <a class="button secondary" href="/tuition">Tuition Rates</a>
+      </div>
+    </div>
+    <div class="home-art-grid" aria-label="Featured student artwork">
+      {artwork.slice(0, 4).map((item, index) => (
+        <img class={`home-art home-art-${index + 1}`} src={item.image} alt={item.alt || item.title} />
+      ))}
+    </div>
+  </section>
+
+  <section class="section-pad gallery-feature">
+    <div class="section-heading split-heading">
+      <div>
+        <p class="eyebrow">Gallery</p>
+        <h2>Student Gallery</h2>
+        <p>{settings.galleryIntro}</p>
+      </div>
+      <a class="text-link" href="/gallery">View full gallery <span>↗</span></a>
+    </div>
+    <div class="masonry-grid featured-grid">
+      {artwork.map((item) => <ArtworkCard artwork={item} />)}
+    </div>
+  </section>
+
+  <section class="section-pad programs-preview">
+    <div class="section-heading split-heading">
+      <div><p class="eyebrow">Classes</p><h2>Programs</h2></div>
+      <a class="text-link" href="/programs">View programs <span>↗</span></a>
+    </div>
+    <div class="program-grid">
+      {primaryProgram && <ProgramCard program={primaryProgram} prominent={true} />}
+      {secondaryPrograms.map((program) => <ProgramCard program={program} />)}
+    </div>
+  </section>
+
+  <section class="tuition-section section-pad">
+    <div class="section-heading split-heading">
+      <div>
+        <p class="eyebrow">{tuition.program} · {tuition.term}</p>
+        <h2>Tuition Rates</h2>
+        {tuition.classCount && <p>All plans include {tuition.classCount} total classes for the semester.</p>}
+      </div>
+      <a class="text-link" href="/tuition">Full tuition details <span>↗</span></a>
+    </div>
+    <TuitionCards tuition={tuition} compact={true} />
+  </section>
+</BaseLayout>

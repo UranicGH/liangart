@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArtworkCard from '../components/ArtworkCard.astro';
+import { getArtwork, getSiteSettings } from '../lib/content';
+
+const [artwork, settings] = await Promise.all([getArtwork(), getSiteSettings()]);
+const programs = ['All', ...new Set(artwork.map((item) => item.program).filter(Boolean))];
+const categories = ['All', ...new Set(artwork.map((item) => item.category).filter(Boolean))];
+---
+<BaseLayout title="Student Gallery" description={settings.galleryIntro}>
+  <section class="page-intro section-pad compact-intro">
+    <p class="eyebrow">Gallery</p>
+    <h1>Student Gallery</h1>
+    <p>{settings.galleryIntro}</p>
+  </section>
+
+  <section class="section-pad gallery-page">
+    {programs.length > 2 && (
+      <div class="filter-group">
+        <span class="filter-label">Program</span>
+        <div class="filter-bar" role="group" aria-label="Filter student work by program">
+          {programs.map((program, index) => <button class:list={{ 'filter-chip': true, active: index === 0 }} data-program-filter={program}>{program}</button>)}
+        </div>
+      </div>
+    )}
+    <div class="filter-group">
+      <span class="filter-label">Awards</span>
+      <div class="filter-bar" role="group" aria-label="Filter student work by award status">
+        <button class="filter-chip active" data-award-filter="All">All Work</button>
+        <button class="filter-chip" data-award-filter="Award Winners">Award Winners</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Category</span>
+      <div class="filter-bar" role="group" aria-label="Filter artwork by category">
+        {categories.map((category, index) => <button class:list={{ 'filter-chip': true, active: index === 0 }} data-category-filter={category}>{category}</button>)}
+      </div>
+    </div>
+    <p id="gallery-count" class="gallery-count">Showing {artwork.length} works</p>
+    <div id="gallery-grid" class="masonry-grid">
+      {artwork.map((item) => <ArtworkCard artwork={item} lightbox={true} />)}
+    </div>
+  </section>
+
+  <dialog id="art-dialog" class="art-dialog">
+    <button class="dialog-close" aria-label="Close artwork">×</button>
+    <img id="dialog-image" alt="" />
+    <div class="dialog-copy"><h2 id="dialog-title"></h2><p id="dialog-meta"></p></div>
+  </dialog>
+
+  <script>
+    const programChips = [...document.querySelectorAll('[data-program-filter]')];
+    const categoryChips = [...document.querySelectorAll('[data-category-filter]')];
+    const awardChips = [...document.querySelectorAll('[data-award-filter]')];
+    const cards = [...document.querySelectorAll('.art-card')];
+    const count = document.querySelector('#gallery-count');
+    let programFilter = 'All';
+    let categoryFilter = 'All';
+    let awardFilter = 'All';
+
+    const applyFilters = () => {
+      let visible = 0;
+      cards.forEach((card) => {
+        const programMatch = programFilter === 'All' || card.getAttribute('data-program') === programFilter;
+        const categoryMatch = categoryFilter === 'All' || card.getAttribute('data-category') === categoryFilter;
+        const awardMatch = awardFilter === 'All' || card.getAttribute('data-award') === 'true';
+        const show = programMatch && categoryMatch && awardMatch;
+        card.toggleAttribute('hidden', !show);
+        if (show) visible += 1;
+      });
+      if (count) count.textContent = `Showing ${visible} ${visible === 1 ? 'work' : 'works'}`;
+    };
+
+    programChips.forEach((chip) => chip.addEventListener('click', () => {
+      programChips.forEach((item) => item.classList.remove('active'));
+      chip.classList.add('active');
+      programFilter = chip.getAttribute('data-program-filter') || 'All';
+      applyFilters();
+    }));
+    categoryChips.forEach((chip) => chip.addEventListener('click', () => {
+      categoryChips.forEach((item) => item.classList.remove('active'));
+      chip.classList.add('active');
+      categoryFilter = chip.getAttribute('data-category-filter') || 'All';
+      applyFilters();
+    }));
+    awardChips.forEach((chip) => chip.addEventListener('click', () => {
+      awardChips.forEach((item) => item.classList.remove('active'));
+      chip.classList.add('active');
+      awardFilter = chip.getAttribute('data-award-filter') || 'All';
+      applyFilters();
+    }));
+
+    const dialog = document.querySelector('#art-dialog');
+    const image = document.querySelector('#dialog-image');
+    const title = document.querySelector('#dialog-title');
+    const meta = document.querySelector('#dialog-meta');
+    document.querySelectorAll('[data-lightbox="true"]').forEach((button) => button.addEventListener('click', () => {
+      if (!(dialog instanceof HTMLDialogElement) || !(image instanceof HTMLImageElement)) return;
+      image.src = button.getAttribute('data-src') || '';
+      image.alt = button.getAttribute('data-title') || 'Student artwork';
+      if (title) title.textContent = button.getAttribute('data-title') || '';
+      if (meta) meta.textContent = button.getAttribute('data-meta') || '';
+      dialog.showModal();
+    }));
+    document.querySelector('.dialog-close')?.addEventListener('click', () => {
+      if (dialog instanceof HTMLDialogElement) dialog.close();
+    });
+    dialog?.addEventListener('click', (event) => {
+      if (event.target === dialog && dialog instanceof HTMLDialogElement) dialog.close();
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,28 @@
+---
+import type { Artwork } from '../lib/content';
+const { artwork, lightbox = false } = Astro.props as { artwork: Artwork; lightbox?: boolean };
+const award = artwork.awards?.[0];
+const meta = `${artwork.student} · ${artwork.medium || artwork.category}${artwork.year ? ` · ${artwork.year}` : ''}`;
+---
+<article class="art-card" data-category={artwork.category} data-program={artwork.program || ''} data-award={award ? 'true' : 'false'} data-year={artwork.year || ''}>
+  {artwork.videoUrl ? (
+    <a class="art-image-wrap is-video-link" href={artwork.videoUrl} target="_blank" rel="noreferrer" aria-label={`View ${artwork.title} animation`}>
+      <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
+      {award && <span class="award-badge">Award winner</span>}
+      <span class="media-badge">View animation ↗</span>
+    </a>
+  ) : (
+    <button class:list={{ 'art-image-wrap': true, 'is-clickable': lightbox }} type="button" data-lightbox={lightbox ? 'true' : undefined} data-src={artwork.imageLarge || artwork.image} data-title={artwork.title} data-meta={meta} aria-label={lightbox ? `Open ${artwork.title}` : undefined} disabled={!lightbox}>
+      <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
+      {award && <span class="award-badge">Award winner</span>}
+    </button>
+  )}
+  <div class="art-meta">
+    <div>
+      <h3>{artwork.title}</h3>
+      <p>{artwork.student}</p>
+    </div>
+    <p class="art-detail">{artwork.medium || artwork.category}{artwork.year ? ` · ${artwork.year}` : ''}</p>
+  </div>
+  {award && <p class="award-line"><span>✦</span> {award.awardName}{award.competition ? ` · ${award.competition}` : ''}</p>}
+</article>

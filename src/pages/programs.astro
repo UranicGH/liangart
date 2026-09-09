@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProgramCard from '../components/ProgramCard.astro';
+import { getPrograms } from '../lib/content';
+const programs = await getPrograms();
+const primaryProgram = programs.find((program) => program.primaryProgram) || programs[0];
+const secondaryPrograms = programs.filter((program) => program.id !== primaryProgram?.id);
+---
+<BaseLayout title="Programs">
+  <section class="page-intro section-pad compact-intro">
+    <p class="eyebrow">Classes</p>
+    <h1>Programs</h1>
+  </section>
+  <section class="section-pad programs-page">
+    <div class="program-grid program-grid-page">
+      {primaryProgram && <ProgramCard program={primaryProgram} prominent={true} />}
+      {secondaryPrograms.map((program) => <ProgramCard program={program} />)}
+    </div>
+  </section>
+</BaseLayout>

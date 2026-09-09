@@ -1,0 +1,23 @@
+---
+const { tuition, compact = false } = Astro.props;
+const classCount = tuition.classCount || null;
+const money = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+---
+<div class:list={{ 'tuition-grid': true, compact }}>
+  {tuition.plans?.map((plan: any) => {
+    const perClass = classCount ? plan.semesterPrice / classCount : null;
+    const savings = plan.regularPrice ? plan.regularPrice - plan.semesterPrice : 0;
+    const savingsPct = plan.regularPrice ? Math.round((savings / plan.regularPrice) * 100) : 0;
+    return (
+      <article class="tuition-card">
+        {plan.durationMinutes && <p class="eyebrow">{plan.durationMinutes} minutes</p>}
+        <h3>{plan.label}</h3>
+        {plan.regularPrice && <p class="regular-price">{money(plan.regularPrice)} / semester</p>}
+        <p class="price">{money(plan.semesterPrice)}</p>
+        <p class="price-note">per semester{perClass ? ` · ${money(perClass)} / class` : ''}</p>
+        {savings > 0 && <p class="savings">You save: {money(savings)} ({savingsPct}% off)</p>}
+        {plan.note && <p class="plan-note">{plan.note}</p>}
+      </article>
+    );
+  })}
+</div>

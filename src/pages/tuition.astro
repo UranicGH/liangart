@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TuitionCards from '../components/TuitionCards.astro';
+import { getTuitionSheets } from '../lib/content';
+const tuitionSheets = await getTuitionSheets();
+const formatDate = (date?: string) => date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : null;
+---
+<BaseLayout title="Tuition" description="Liang Art Studio tuition rates.">
+  <section class="page-intro section-pad compact-intro tuition-intro">
+    <p class="eyebrow">Tuition</p>
+    <h1>Tuition Rates</h1>
+  </section>
+  <section class="section-pad tuition-page">
+    <div class="tuition-sheets">
+      {tuitionSheets.map((tuition) => (
+        <section class="tuition-sheet">
+          <div class="tuition-sheet-heading">
+            <p class="eyebrow">{tuition.program}</p>
+            <h2>{tuition.term}</h2>
+            {tuition.classCount && (
+              <p>
+                All plans include {tuition.classCount} total classes for the semester.
+                {tuition.effectiveDate ? ` Prices are effective for the ${tuition.term} semester.` : ''}
+                {tuition.lastUpdated ? ` Last updated ${formatDate(tuition.lastUpdated)}.` : ''}
+              </p>
+            )}
+          </div>
+          <TuitionCards tuition={tuition} />
+          {tuition.notes?.length > 0 && (
+            <div class="tuition-notes">
+              <ul>{tuition.notes.map((note: string) => <li>{note}</li>)}</ul>
+            </div>
+          )}
+        </section>
+      ))}
+    </div>
+    <div class="tuition-contact">
+      <a class="button primary" href="/contact">Contact Us</a>
+    </div>
+  </section>
+</BaseLayout>

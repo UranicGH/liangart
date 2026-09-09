@@ -1,0 +1,15 @@
+---
+import type { Program } from '../lib/content';
+interface Props { program: Program; prominent?: boolean; }
+const { program, prominent = false } = Astro.props;
+---
+<article class:list={{ 'program-card': true, prominent }}>
+  {program.image && <img src={program.image} alt="" />}
+  <div class="program-card-copy">
+    <div class="program-card-topline">
+      <h3>{program.name}</h3>
+      {program.instructor && <span>{program.instructor}</span>}
+    </div>
+    {program.summary && <p>{program.summary}</p>}
+  </div>
+</article>

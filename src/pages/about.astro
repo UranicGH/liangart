@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getInstructors, getSiteSettings } from '../lib/content';
+const [settings, instructors] = await Promise.all([getSiteSettings(), getInstructors()]);
+---
+<BaseLayout title="About">
+  <section class="about-layout section-pad">
+    <div class="about-copy">
+      <p class="eyebrow">About</p>
+      <h1>{settings.aboutHeading}</h1>
+      <p class="large-copy">{settings.aboutText}</p>
+    </div>
+    <div class="portrait-frame">
+      {settings.studioPhotoUrl ? <img src={settings.studioPhotoUrl} alt="Liang Art Studio" /> : <div class="portrait-placeholder"><span>Studio photo</span><small>Add in Site Settings</small></div>}
+    </div>
+  </section>
+
+  <section class="section-pad faculty-section">
+    <div class="section-heading faculty-heading">
+      <p class="eyebrow">Faculty</p>
+      <h2>Instructors</h2>
+    </div>
+    <div class="faculty-grid">
+      {instructors.map((instructor) => (
+        <article class="faculty-card">
+          <div class="faculty-photo">
+            {instructor.photo ? <img src={instructor.photo} alt={instructor.name} /> : <div class="portrait-placeholder"><span>Instructor photo</span><small>Add in /admin</small></div>}
+          </div>
+          <div class="faculty-copy">
+            <h3>{instructor.name}</h3>
+            {instructor.publicTitle && <p class="faculty-title">{instructor.publicTitle}</p>}
+            {instructor.bio && <p>{instructor.bio}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

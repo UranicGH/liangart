@@ -1,0 +1,55 @@
+---
+import '../styles/global.css';
+import { getSiteSettings } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const settings = await getSiteSettings();
+const { title = settings.studioName, description = settings.tagline } = Astro.props;
+const path = Astro.url.pathname;
+const links = [
+  ['/', 'Home'],
+  ['/gallery', 'Student Work'],
+  ['/programs', 'Programs'],
+  ['/tuition', 'Tuition'],
+  ['/about', 'About'],
+  ['/contact', 'Contact'],
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f7f4ee" />
+    <title>{title === settings.studioName ? title : `${title} — ${settings.studioName}`}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label={`${settings.studioName} home`}>Liang Art Studio</a>
+      <nav class="nav" aria-label="Primary navigation">
+        {links.map(([href, label]) => <a class:list={{ active: href === '/' ? path === '/' : path.startsWith(href) }} href={href}>{label}</a>)}
+      </nav>
+      <a class="nav-cta" href="/tuition">Tuition</a>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer">
+      <div>
+        <div class="footer-mark">Liang Art Studio</div>
+        <p>{settings.tagline}</p>
+      </div>
+      <div class="footer-links">
+        <a href="/gallery">Student Work</a>
+        <a href="/programs">Programs</a>
+        <a href="/tuition">Tuition</a>
+        <a href="/contact">Contact</a>
+        <a href="/admin" rel="nofollow">Admin</a>
+      </div>
+      <p class="copyright">© {new Date().getFullYear()} Liang Art Studio</p>
+    </footer>
+  </body>
+</html>

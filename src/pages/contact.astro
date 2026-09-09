@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/content';
+const settings = await getSiteSettings();
+---
+<BaseLayout title="Contact">
+  <section class="contact-layout section-pad">
+    <div>
+      <p class="eyebrow">Contact</p>
+      <h1>Contact Us</h1>
+      <p class="large-copy">{settings.contactText}</p>
+      <dl class="contact-list">
+        {settings.email && <><dt>Email</dt><dd><a href={`mailto:${settings.email}`}>{settings.email}</a></dd></>}
+        {settings.phone && <><dt>Phone</dt><dd>{settings.phone}</dd></>}
+        {settings.address && <><dt>Studio</dt><dd>{settings.address}</dd></>}
+      </dl>
+    </div>
+    <div class="qr-card">
+      {settings.wechatQrUrl ? <img src={settings.wechatQrUrl} alt="Liang Art Studio WeChat QR code" /> : <div class="qr-placeholder">WeChat QR</div>}
+    </div>
+  </section>
+</BaseLayout>
