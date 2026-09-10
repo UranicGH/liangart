@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#e8e1d7"/>
+  <circle cx="400" cy="340" r="150" fill="#b9aa98"/>
+  <path d="M155 930c28-212 128-330 245-330s217 118 245 330" fill="#b9aa98"/>
+  <rect x="55" y="55" width="690" height="890" rx="12" fill="none" stroke="#7c6e60" stroke-width="5"/>
+  <text x="400" y="875" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" fill="#4d443b">[DEMO] STUDENT PORTRAIT</text>
+  <text x="400" y="920" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#6f6256">Optional artist image</text>
+</svg>

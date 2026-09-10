@@ -85,7 +85,7 @@ This creates, if they do not already exist:
 - Studio Art (primary program)
 - Animation
 - Spanish
-- Site Settings using approved text from the original website, with “Teacher Liang” updated to “Yolanda Liang”
+- Site Settings using approved text from the original website
 
 Instructor biography prompts and unapproved Animation/Spanish descriptions are explicitly marked `[Draft]`.
 
@@ -102,9 +102,11 @@ The CMS sections are:
 - Programs
 - Instructors
 - Tuition
+- FAQs
+- Testimonials
 - Site Settings
 
-The public gallery deliberately excludes any work whose linked student does not have **Permission to Publish** enabled.
+The public gallery deliberately excludes any work whose linked student does not have **Permission to Publish Artwork / Name** enabled. Student portraits, per-work student/process photos, and certificate images each have additional publication controls.
 
 ## 9. Add tuition
 
@@ -120,14 +122,20 @@ In `/admin` → Student Work → Create:
 - title
 - choose/create student
 - choose program (`Studio Art` or `Animation` for gallery work)
-- category + medium
-- date/year
+- category + medium/technique
+- completion date/year
+- optional age and grade at completion
+- optional dimensions and instructor(s)
+- optional artist statement
+- optional approved student/process photo
 - optional animation/video URL
-- optional awards
+- optional awards, award division/level, result URL, and approved certificate/award image
 - optionally mark as Featured
 - publish
 
-Animation entries use the same student-work and award system as Studio Art. Their uploaded image is the gallery thumbnail; the optional video URL can link to YouTube/Vimeo/etc.
+Animation entries use the same student-work and award system as Studio Art. Their uploaded image is the gallery thumbnail; the optional video URL can link to YouTube/Vimeo/etc. Animation awards therefore appear in the same Award Winners gallery filter.
+
+Optional FAQs are shown below tuition when published. Optional testimonials can appear on the homepage only when both **Permission to Publish** and **Show on Homepage** are enabled.
 
 ## 11. Cloudflare Pages deployment
 

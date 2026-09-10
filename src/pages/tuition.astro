@@ -1,8 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TuitionCards from '../components/TuitionCards.astro';
-import { getTuitionSheets } from '../lib/content';
-const tuitionSheets = await getTuitionSheets();
+import { getFaqs, getTuitionSheets } from '../lib/content';
+const [tuitionSheets, faqs] = await Promise.all([getTuitionSheets(), getFaqs()]);
 const formatDate = (date?: string) => date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : null;
 ---
 <BaseLayout title="Tuition" description="Liang Art Studio tuition rates.">
@@ -38,4 +38,21 @@ const formatDate = (date?: string) => date ? new Date(`${date}T12:00:00`).toLoca
       <a class="button primary" href="/contact">Contact Us</a>
     </div>
   </section>
+
+  {faqs.length > 0 && (
+    <section class="section-pad faq-section">
+      <div class="section-heading">
+        <p class="eyebrow">Information</p>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list">
+        {faqs.map((item) => (
+          <details class="faq-item">
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  )}
 </BaseLayout>

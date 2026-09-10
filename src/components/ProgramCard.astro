@@ -2,14 +2,23 @@
 import type { Program } from '../lib/content';
 interface Props { program: Program; prominent?: boolean; }
 const { program, prominent = false } = Astro.props;
+const instructors = [program.instructor, ...(program.additionalInstructors || [])].filter(Boolean);
 ---
-<article class:list={{ 'program-card': true, prominent }}>
+<article class:list={{ 'program-card': true, prominent }} data-program={program.name}>
   {program.image && <img src={program.image} alt="" />}
   <div class="program-card-copy">
     <div class="program-card-topline">
       <h3>{program.name}</h3>
-      {program.instructor && <span>{program.instructor}</span>}
+      {instructors.length > 0 && <span>{instructors.join(', ')}</span>}
     </div>
     {program.summary && <p>{program.summary}</p>}
+    {(program.ageRange || program.scheduleSummary || program.enrollmentStatus) && (
+      <div class="program-facts">
+        {program.ageRange && <span>{program.ageRange}</span>}
+        {program.scheduleSummary && <span>{program.scheduleSummary}</span>}
+        {program.enrollmentStatus && <span>{program.enrollmentStatus}</span>}
+      </div>
+    )}
+    {program.registrationNote && <p class="program-registration-note">{program.registrationNote}</p>}
   </div>
 </article>

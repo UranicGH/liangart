@@ -1,28 +1,130 @@
 ---
 import type { Artwork } from '../lib/content';
 const { artwork, lightbox = false } = Astro.props as { artwork: Artwork; lightbox?: boolean };
-const award = artwork.awards?.[0];
-const meta = `${artwork.student} · ${artwork.medium || artwork.category}${artwork.year ? ` · ${artwork.year}` : ''}`;
+const award = artwork.awards?.find((item) => item.featuredInGallery) || artwork.awards?.[0];
+const galleryAward = artwork.awards?.find((item) => item.featuredInGallery && item.certificateImage) || artwork.awards?.find((item) => item.certificateImage);
+const galleryCertificate = galleryAward?.certificateImage;
+const hasGallerySupportingMedia = Boolean(artwork.studentPhoto || galleryCertificate);
+const dimensions = artwork.dimensions?.width && artwork.dimensions?.height
+  ? `${artwork.dimensions.width} × ${artwork.dimensions.height} ${artwork.dimensions.unit || 'in'}`
+  : undefined;
+const studentMedia = [
+  artwork.studentPhoto ? { src: artwork.studentPhoto, label: artwork.student } : null,
+  ...(artwork.studentContextImages || []).map((item) => ({ src: item.image, label: item.caption || 'Student / process photo' })),
+].filter(Boolean) as Array<{ src: string; label: string }>;
 ---
-<article class="art-card" data-category={artwork.category} data-program={artwork.program || ''} data-award={award ? 'true' : 'false'} data-year={artwork.year || ''}>
-  {artwork.videoUrl ? (
-    <a class="art-image-wrap is-video-link" href={artwork.videoUrl} target="_blank" rel="noreferrer" aria-label={`View ${artwork.title} animation`}>
-      <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
-      {award && <span class="award-badge">Award winner</span>}
-      <span class="media-badge">View animation ↗</span>
-    </a>
-  ) : (
-    <button class:list={{ 'art-image-wrap': true, 'is-clickable': lightbox }} type="button" data-lightbox={lightbox ? 'true' : undefined} data-src={artwork.imageLarge || artwork.image} data-title={artwork.title} data-meta={meta} aria-label={lightbox ? `Open ${artwork.title}` : undefined} disabled={!lightbox}>
-      <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
-      {award && <span class="award-badge">Award winner</span>}
-    </button>
-  )}
+<article class="art-card" data-category={artwork.category} data-program={artwork.program || ''} data-award={award ? 'true' : 'false'} data-year={artwork.year || ''} data-age={artwork.ageAtCompletion || ''}>
+  <div class:list={{ 'art-visual-cluster': true, 'has-supporting-media': hasGallerySupportingMedia }}>
+    {artwork.videoUrl ? (
+      <a class="art-image-wrap is-video-link" href={artwork.videoUrl} target="_blank" rel="noreferrer" aria-label={`View ${artwork.title} animation`}>
+        <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
+        {award && <span class="award-badge">Award winner</span>}
+        <span class="media-badge">View animation ↗</span>
+      </a>
+    ) : (
+      <button class:list={{ 'art-image-wrap': true, 'is-clickable': lightbox }} type="button" data-lightbox={lightbox ? 'true' : undefined} aria-label={lightbox ? `Open ${artwork.title}` : undefined} disabled={!lightbox}>
+        <img src={artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} loading="lazy" />
+        {award && <span class="award-badge">Award winner</span>}
+      </button>
+    )}
+
+    {artwork.studentPhoto && (
+      <figure class="gallery-support gallery-support-student" aria-label={`Student artist: ${artwork.student}`}>
+        <img src={artwork.studentPhoto} alt={`${artwork.student}, student artist`} loading="lazy" />
+        <figcaption>Artist</figcaption>
+      </figure>
+    )}
+    {galleryCertificate && (
+      <figure class="gallery-support gallery-support-award" aria-label={`Award image for ${artwork.title}`}>
+        <img src={galleryCertificate} alt={`Award certificate for ${artwork.title}`} loading="lazy" />
+        <figcaption>Award</figcaption>
+      </figure>
+    )}
+  </div>
+
   <div class="art-meta">
     <div>
       <h3>{artwork.title}</h3>
-      <p>{artwork.student}</p>
+      <p>{artwork.student}{artwork.ageAtCompletion ? ` · Age ${artwork.ageAtCompletion}` : ''}</p>
     </div>
     <p class="art-detail">{artwork.medium || artwork.category}{artwork.year ? ` · ${artwork.year}` : ''}</p>
   </div>
   {award && <p class="award-line"><span>✦</span> {award.awardName}{award.competition ? ` · ${award.competition}` : ''}</p>}
+  {lightbox && artwork.videoUrl && <button class="work-details-button" type="button" data-lightbox="true">View details</button>}
+
+  {lightbox && (
+    <template class="art-dialog-template">
+      <div class="art-dialog-layout">
+        <div class="dialog-artwork-panel">
+          <img class="dialog-artwork-image" src={artwork.imageLarge || artwork.image} alt={artwork.alt || `${artwork.title} by ${artwork.student}`} />
+        </div>
+        <div class="dialog-details-panel">
+          <div>
+            <p class="eyebrow">{artwork.program || 'Student Work'}</p>
+            <h2>{artwork.title}</h2>
+            <p class="dialog-student">{artwork.student}</p>
+          </div>
+
+          <dl class="work-facts">
+            {artwork.ageAtCompletion && <><dt>Age</dt><dd>{artwork.ageAtCompletion}</dd></>}
+            {artwork.gradeAtCompletion && <><dt>Grade</dt><dd>{artwork.gradeAtCompletion}</dd></>}
+            {artwork.medium && <><dt>Medium</dt><dd>{artwork.medium}</dd></>}
+            {!artwork.medium && artwork.category && <><dt>Category</dt><dd>{artwork.category}</dd></>}
+            {dimensions && <><dt>Dimensions</dt><dd>{dimensions}</dd></>}
+            {artwork.artworkDate && <><dt>Completed</dt><dd>{artwork.artworkDate}</dd></>}
+            {!artwork.artworkDate && artwork.year && <><dt>Year</dt><dd>{artwork.year}</dd></>}
+            {artwork.instructors?.length > 0 && <><dt>Instructor</dt><dd>{artwork.instructors.join(', ')}</dd></>}
+          </dl>
+
+          {artwork.description && <div class="dialog-text-block"><h3>About the work</h3><p>{artwork.description}</p></div>}
+          {artwork.artistStatement && <div class="dialog-text-block"><h3>Artist statement</h3><p>{artwork.artistStatement}</p></div>}
+
+          {artwork.awards?.length > 0 && (
+            <div class="dialog-awards">
+              <h3>Awards</h3>
+              {artwork.awards.map((item) => (
+                <div class="dialog-award-item">
+                  <div>
+                    <strong>{item.awardName}</strong>
+                    <p>{[item.competition, item.division, item.level, item.year].filter(Boolean).join(' · ')}</p>
+                    {item.url && <a class="text-link" href={item.url} target="_blank" rel="noreferrer">View result <span>↗</span></a>}
+                  </div>
+                  {(item.certificateImage || item.additionalMedia?.length) && (
+                    <div class="award-media-strip">
+                      {item.certificateImage && (
+                        <a class="supporting-thumb certificate-thumb" href={item.certificateImage} target="_blank" rel="noreferrer" aria-label={`Open certificate image for ${item.awardName || 'award'}`}>
+                          <img src={item.certificateImage} alt={`Certificate or award image for ${item.awardName || 'award'}`} loading="lazy" />
+                        </a>
+                      )}
+                      {item.additionalMedia?.map((media) => (
+                        <a class="supporting-thumb certificate-thumb" href={media.image} target="_blank" rel="noreferrer" aria-label={`Open ${media.kind || 'award'} image`}>
+                          <img src={media.image} alt={media.caption || `${media.kind || 'Award'} image`} loading="lazy" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {studentMedia.length > 0 && (
+            <div class="dialog-supporting-media">
+              <h3>Student</h3>
+              <div class="supporting-media-grid">
+                {studentMedia.map((item) => (
+                  <figure>
+                    <a class="supporting-thumb student-thumb" href={item.src} target="_blank" rel="noreferrer">
+                      <img src={item.src} alt={item.label} loading="lazy" />
+                    </a>
+                    <figcaption>{item.label}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </template>
+  )}
 </article>

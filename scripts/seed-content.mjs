@@ -8,6 +8,7 @@ const documents = [
     _type: 'instructor',
     name: 'Yolanda Liang',
     publicTitle: 'Instructor',
+    displayOrder: 1,
     bio: '[Draft] Add Yolanda Liang’s education, teaching experience, media specialties, competition mentorship, and approach to instruction.',
   },
   {
@@ -15,6 +16,7 @@ const documents = [
     _type: 'instructor',
     name: 'Paula Pelet Cruz',
     publicTitle: 'Instructor',
+    displayOrder: 2,
     bio: '[Draft] Add Paula Pelet Cruz’s background in animation and Spanish instruction, relevant education or professional experience, and teaching approach.',
   },
   {
@@ -68,11 +70,15 @@ const documents = [
 for (const document of documents) {
   const existing = await client.getDocument(document._id);
   if (existing) {
-    console.log(`SKIP ${document._id}: already exists`);
+    console.log(`KEEP ${document._id}: already exists`);
     continue;
   }
   await client.create(document);
   console.log(`CREATE ${document._id}`);
 }
 
-console.log('\nCore studio content seeded. Review all [Draft] copy in /admin before launch.');
+// Safe, non-destructive defaults for projects seeded with earlier starter versions.
+await client.patch('instructor-yolanda-liang').setIfMissing({ displayOrder: 1 }).commit();
+await client.patch('instructor-paula-pelet-cruz').setIfMissing({ displayOrder: 2 }).commit();
+
+console.log('\nCore studio content seeded/updated. Existing edited content was preserved. Review all [Draft] copy in /admin before launch.');

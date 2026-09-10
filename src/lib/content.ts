@@ -1,26 +1,49 @@
 import { client, sanityConfigured, sanityImageUrl } from './sanity';
 import { demoArtwork, demoInstructors, demoPrograms, demoSettings, demoTuition } from '../data/demo';
 
-export type Award = { competition?: string; awardName?: string; level?: string; year?: number; date?: string; url?: string; notes?: string };
+export type Award = {
+  competition?: string;
+  awardName?: string;
+  division?: string;
+  level?: string;
+  year?: number;
+  date?: string;
+  url?: string;
+  notes?: string;
+  certificateImage?: string;
+  featuredInGallery?: boolean;
+  additionalMedia?: Array<{ image: string; kind?: string; caption?: string }>;
+};
+
 export type Instructor = {
   id: string;
   name: string;
   publicTitle?: string;
+  displayOrder?: number;
   bio?: string;
   photo?: string;
+  credentials?: string[];
+  specialties?: string[];
 };
+
 export type Program = {
   id: string;
   name: string;
   slug: string;
   programType?: string;
   instructor?: string;
+  additionalInstructors?: string[];
   primaryProgram?: boolean;
   displayOrder?: number;
   summary?: string;
   details?: string;
+  ageRange?: string;
+  scheduleSummary?: string;
+  enrollmentStatus?: string;
+  registrationNote?: string;
   image?: string;
 };
+
 export type Artwork = {
   id: string;
   title: string;
@@ -33,13 +56,21 @@ export type Artwork = {
   artworkDate?: string;
   className?: string;
   description?: string;
+  artistStatement?: string;
   videoUrl?: string;
   featured?: boolean;
   image: string;
   imageLarge?: string;
   alt?: string;
+  ageAtCompletion?: number;
+  gradeAtCompletion?: string;
+  dimensions?: { width?: number; height?: number; unit?: string };
+  instructors?: string[];
+  studentPhoto?: string;
+  studentContextImages?: Array<{ image: string; caption?: string }>;
   awards: Award[];
 };
+
 export type SiteSettings = {
   studioName: string;
   tagline: string;
@@ -53,7 +84,15 @@ export type SiteSettings = {
   phone?: string;
   address?: string;
   instagram?: string;
+  registrationUrl?: string;
+  googleMapsUrl?: string;
+  hoursSummary?: string;
+  serviceAreas?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  socialShareImageUrl?: string;
 };
+
 export type TuitionSheet = {
   id?: string;
   program: string;
@@ -69,23 +108,59 @@ export type TuitionSheet = {
   registrationCta?: string;
 };
 
-const artworkQuery = `*[_type == "artwork" && defined(image.asset) && student->permissionToPublish == true] | order(coalesce(displayOrder, 9999) asc, artworkDate desc, _createdAt desc) {
+export type Faq = {
+  id: string;
+  question: string;
+  answer: string;
+  category?: string;
+  displayOrder?: number;
+};
+
+export type Testimonial = {
+  id: string;
+  quote: string;
+  attribution: string;
+  program?: string;
+  featured?: boolean;
+  displayOrder?: number;
+};
+
+const artworkQuery = `*[_type == "artwork" && showOnWebsite != false && defined(image.asset) && student->permissionToPublish == true] | order(coalesce(displayOrder, 9999) asc, artworkDate desc, _createdAt desc) {
   "id": _id,
   title,
   "student": student->displayName,
+  "studentPhoto": select(student->photoPermissionToPublish == true => student->photo, null),
   "program": program->name,
   "programSlug": program->slug.current,
-  category,
+  "instructors": instructors[]->name,
+  "category": category->name,
   medium,
   year,
   artworkDate,
   className,
   description,
+  artistStatement,
   videoUrl,
   featured,
+  "ageAtCompletion": select(showAgePublicly == true => ageAtCompletion, null),
+  "gradeAtCompletion": select(showGradePublicly == true => gradeAtCompletion, null),
+  dimensions,
+  "studentContextImages": studentContextImages[approvedForPublication == true]{image, caption},
   image,
   "alt": image.alt,
-  awards
+  awards[]{
+    "competition": coalesce(competition->name, competitionNameOverride),
+    awardName,
+    featuredInGallery,
+    division,
+    level,
+    year,
+    date,
+    "url": coalesce(url, competition->website),
+    notes,
+    "certificateImage": select(certificateApprovedForPublication == true => certificateImage, null),
+    "additionalMedia": additionalAwardMedia[approvedForPublication == true]{image, kind, caption}
+  }
 }`;
 
 export async function getArtwork(): Promise<Artwork[]> {
@@ -95,8 +170,20 @@ export async function getArtwork(): Promise<Artwork[]> {
     ...row,
     image: sanityImageUrl(row.image, 900),
     imageLarge: sanityImageUrl(row.image, 1800),
+    studentPhoto: row.studentPhoto ? sanityImageUrl(row.studentPhoto, 500) : undefined,
+    studentContextImages: (row.studentContextImages || []).map((item: any) => ({
+      ...item,
+      image: item.image ? sanityImageUrl(item.image, 900) : undefined,
+    })).filter((item: any) => item.image),
     alt: row.alt || `${row.title} by ${row.student}`,
-    awards: row.awards || [],
+    awards: (row.awards || []).map((award: any) => ({
+      ...award,
+      certificateImage: award.certificateImage ? sanityImageUrl(award.certificateImage, 1200) : undefined,
+      additionalMedia: (award.additionalMedia || []).map((item: any) => ({
+        ...item,
+        image: item.image ? sanityImageUrl(item.image, 1200) : undefined,
+      })).filter((item: any) => item.image),
+    })),
   }));
 }
 
@@ -114,10 +201,15 @@ export async function getPrograms(): Promise<Program[]> {
     "slug": slug.current,
     programType,
     "instructor": instructor->name,
+    "additionalInstructors": additionalInstructors[]->name,
     primaryProgram,
     displayOrder,
     summary,
     details,
+    ageRange,
+    scheduleSummary,
+    enrollmentStatus,
+    registrationNote,
     featuredImage
   }`);
   return rows.map((row) => ({
@@ -128,12 +220,15 @@ export async function getPrograms(): Promise<Program[]> {
 
 export async function getInstructors(): Promise<Instructor[]> {
   if (!sanityConfigured || !client) return demoInstructors;
-  const rows = await client.fetch<any[]>(`*[_type == "instructor"] | order(name asc) {
+  const rows = await client.fetch<any[]>(`*[_type == "instructor"] | order(coalesce(displayOrder, 9999) asc, name asc) {
     "id": _id,
     name,
     publicTitle,
+    displayOrder,
     bio,
-    photo
+    photo,
+    credentials,
+    specialties
   }`);
   return rows.map((row) => ({
     ...row,
@@ -165,14 +260,38 @@ export async function getPrimaryTuition(): Promise<TuitionSheet> {
   return (sheets.find((sheet) => sheet.primaryProgram) || sheets[0]) as TuitionSheet;
 }
 
+export async function getFaqs(): Promise<Faq[]> {
+  if (!sanityConfigured || !client) return [];
+  return client.fetch<Faq[]>(`*[_type == "faq" && showOnWebsite != false] | order(coalesce(displayOrder, 9999) asc, question asc) {
+    "id": _id,
+    question,
+    answer,
+    category,
+    displayOrder
+  }`);
+}
+
+export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
+  if (!sanityConfigured || !client) return [];
+  return client.fetch<Testimonial[]>(`*[_type == "testimonial" && permissionToPublish == true && featured == true] | order(coalesce(displayOrder, 9999) asc) {
+    "id": _id,
+    quote,
+    attribution,
+    "program": program->name,
+    featured,
+    displayOrder
+  }`);
+}
+
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (!sanityConfigured || !client) return demoSettings;
-  const row = await client.fetch<any>(`*[_type == "siteSettings" && _id == "siteSettings"][0]{studioName,tagline,galleryIntro,aboutHeading,aboutText,studioPhoto,wechatQr,contactText,email,phone,address,instagram}`);
+  const row = await client.fetch<any>(`*[_type == "siteSettings" && _id == "siteSettings"][0]{studioName,tagline,galleryIntro,aboutHeading,aboutText,studioPhoto,wechatQr,contactText,email,phone,address,instagram,registrationUrl,googleMapsUrl,hoursSummary,serviceAreas,seoTitle,seoDescription,socialShareImage}`);
   if (!row) return demoSettings;
   return {
     ...demoSettings,
     ...row,
     studioPhotoUrl: row.studioPhoto ? sanityImageUrl(row.studioPhoto, 1200) : undefined,
     wechatQrUrl: row.wechatQr ? sanityImageUrl(row.wechatQr, 900) : undefined,
+    socialShareImageUrl: row.socialShareImage ? sanityImageUrl(row.socialShareImage, 1600) : undefined,
   };
 }

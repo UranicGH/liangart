@@ -30,6 +30,18 @@ const [settings, instructors] = await Promise.all([getSiteSettings(), getInstruc
             <h3>{instructor.name}</h3>
             {instructor.publicTitle && <p class="faculty-title">{instructor.publicTitle}</p>}
             {instructor.bio && <p>{instructor.bio}</p>}
+            {instructor.credentials?.length > 0 && (
+              <div class="faculty-facts">
+                <strong>Credentials / Education</strong>
+                <ul>{instructor.credentials.map((item) => <li>{item}</li>)}</ul>
+              </div>
+            )}
+            {instructor.specialties?.length > 0 && (
+              <div class="faculty-facts">
+                <strong>Teaching Specialties</strong>
+                <p>{instructor.specialties.join(' · ')}</p>
+              </div>
+            )}
           </div>
         </article>
       ))}

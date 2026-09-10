@@ -1,0 +1,26 @@
+<dialog id="art-dialog" class="art-dialog">
+  <button class="dialog-close" aria-label="Close artwork">×</button>
+  <div id="dialog-content"></div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector('#art-dialog');
+  const dialogContent = document.querySelector('#dialog-content');
+
+  document.querySelectorAll('[data-lightbox="true"]').forEach((button) => button.addEventListener('click', () => {
+    if (!(dialog instanceof HTMLDialogElement) || !dialogContent) return;
+    const card = button.closest('.art-card');
+    const template = card?.querySelector('.art-dialog-template');
+    if (!(template instanceof HTMLTemplateElement)) return;
+    dialogContent.replaceChildren(template.content.cloneNode(true));
+    dialog.showModal();
+  }));
+
+  document.querySelector('.dialog-close')?.addEventListener('click', () => {
+    if (dialog instanceof HTMLDialogElement) dialog.close();
+  });
+
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog && dialog instanceof HTMLDialogElement) dialog.close();
+  });
+</script>

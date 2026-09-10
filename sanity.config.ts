@@ -11,7 +11,6 @@ export default defineConfig({
   title: 'Liang Art Studio',
   projectId,
   dataset,
-  basePath: '/admin',
   plugins: [structureTool({ structure: studioStructure })],
   schema: { types: schemaTypes },
 });
