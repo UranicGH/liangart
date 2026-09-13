@@ -106,3 +106,18 @@ Cloudflare deployment configuration is stored in `wrangler.jsonc`. The public si
 ## Mobile layout
 
 v12 uses one shared responsive gutter across the header, homepage Student Gallery, homepage Tuition, faculty section and footer. Full-width colored/background sections keep their visual treatment while their contents remain inset and centered on phones.
+
+## Homepage ambient media (v14)
+
+The homepage can now use a short classroom montage as a subtle hero background while published student artwork is also reused as low-opacity visual texture around later homepage sections.
+
+In **Studio Setup → Website Information → Homepage Media**:
+
+- **Homepage Classroom Video**: optional short MP4/WebM upload. Keep it concise and compressed (roughly 10–20 seconds is plenty). It is muted, looped, and only loaded on larger screens when the visitor has not enabled reduced motion.
+- **Homepage Video Poster / Mobile Image**: optional still image used before playback and as the calm fallback on phones/reduced-motion devices.
+
+The background-art treatment is automatic; no artwork needs to be specially tagged for it.
+
+## v15 homepage media direction
+
+The homepage no longer uses floating/faded artwork thumbnails as decoration. Instead, major sections use one full-bleed student artwork as a background composition with a high-readability content panel above it. The hero background is also the permanent slot for the future muted looping classroom montage: until a video is uploaded, a randomly selected student artwork fills that same area. When a video is later added in Sanity, it replaces the artwork as the moving media layer without changing the hero layout.

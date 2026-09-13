@@ -6,6 +6,7 @@ export const siteSettings = defineType({
   type: 'document',
   groups: [
     { name: 'basic', title: 'Basic Website Text', default: true },
+    { name: 'homeMedia', title: 'Homepage Media' },
     { name: 'contact', title: 'Contact & Location' },
     { name: 'advanced', title: 'Advanced / Search' },
   ],
@@ -16,6 +17,23 @@ export const siteSettings = defineType({
     defineField({ name: 'aboutHeading', title: 'About Heading', type: 'string', group: 'basic', initialValue: 'About Liang Art Studio' }),
     defineField({ name: 'aboutText', title: 'About Text', type: 'text', group: 'basic', rows: 6 }),
     defineField({ name: 'studioPhoto', title: 'Studio / About Photo', type: 'image', group: 'basic', options: { hotspot: true } }),
+
+    defineField({
+      name: 'homepageVideo',
+      title: 'Homepage Classroom Video',
+      type: 'file',
+      group: 'homeMedia',
+      description: 'Optional. Upload a short, silent-friendly classroom montage (MP4/WebM recommended). The site loops it subtly behind the homepage hero on larger screens.',
+      options: { accept: 'video/*', storeOriginalFilename: false },
+    }),
+    defineField({
+      name: 'homepageVideoPoster',
+      title: 'Homepage Video Poster / Mobile Image',
+      type: 'image',
+      group: 'homeMedia',
+      description: 'Optional still image shown before the video loads and used as the calm fallback on smaller screens or when reduced motion is enabled.',
+      options: { hotspot: true },
+    }),
 
     defineField({ name: 'wechatQr', title: 'WeChat QR Code', type: 'image', group: 'contact' }),
     defineField({ name: 'contactText', title: 'Contact Instructions', type: 'text', group: 'contact', rows: 4 }),

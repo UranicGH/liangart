@@ -92,6 +92,8 @@ export type SiteSettings = {
   seoTitle?: string;
   seoDescription?: string;
   socialShareImageUrl?: string;
+  homepageVideoUrl?: string;
+  homepageVideoPosterUrl?: string;
 };
 
 export type TuitionSheet = {
@@ -279,7 +281,7 @@ export async function getFaqs(): Promise<Faq[]> {
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (!sanityConfigured || !client) return demoSettings;
-  const row = await client.fetch<any>(`*[_type == "siteSettings" && _id == "siteSettings"][0]{studioName,tagline,galleryIntro,aboutHeading,aboutText,studioPhoto,wechatQr,contactText,email,phone,address,instagram,registrationUrl,googleMapsUrl,hoursSummary,serviceAreas,seoTitle,seoDescription,socialShareImage}`);
+  const row = await client.fetch<any>(`*[_type == "siteSettings" && _id == "siteSettings"][0]{studioName,tagline,galleryIntro,aboutHeading,aboutText,studioPhoto,wechatQr,contactText,email,phone,address,instagram,registrationUrl,googleMapsUrl,hoursSummary,serviceAreas,seoTitle,seoDescription,socialShareImage,"homepageVideoUrl": homepageVideo.asset->url,homepageVideoPoster}`);
   if (!row) return demoSettings;
   return {
     ...demoSettings,
@@ -287,5 +289,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     studioPhotoUrl: row.studioPhoto ? sanityImageUrl(row.studioPhoto, 1200) : undefined,
     wechatQrUrl: row.wechatQr ? sanityImageUrl(row.wechatQr, 900) : undefined,
     socialShareImageUrl: row.socialShareImage ? sanityImageUrl(row.socialShareImage, 1600) : undefined,
+    homepageVideoUrl: row.homepageVideoUrl || undefined,
+    homepageVideoPosterUrl: row.homepageVideoPoster ? sanityImageUrl(row.homepageVideoPoster, 1800) : undefined,
   };
 }
