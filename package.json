@@ -1,6 +1,6 @@
 {
   "name": "liang-art-studio",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,11 +13,10 @@
     "seed:content": "sanity exec scripts/seed-content.mjs --with-user-token",
     "seed:demo": "sanity exec scripts/seed-demo.mjs --with-user-token",
     "remove:demo": "sanity exec scripts/remove-demo.mjs --with-user-token",
-    "migrate:legacy:check": "sanity exec scripts/migrate-legacy-gallery.mjs --with-user-token -- --dry-run"
+    "migrate:legacy:check": "sanity exec scripts/migrate-legacy-gallery.mjs --with-user-token -- --dry-run",
+    "cms:dev": "sanity dev"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.5",
-    "@sanity/astro": "^3.5.1",
     "@sanity/client": "^8.6.1",
     "@sanity/image-url": "^2.1.1",
     "astro": "^7.3.2",
@@ -29,7 +28,8 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "typescript": "^5.9.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "wrangler": "^4.131.0"
   },
   "engines": {
     "node": ">=22.12"

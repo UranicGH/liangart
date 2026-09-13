@@ -1,3 +1,7 @@
+# Archived v10 note
+
+The embedded `/admin` approach described below was retired in v11. Sanity Studio is now run/deployed separately; see `DEPLOYMENT.md`.
+
 # v10 notes
 
 ## Visual direction

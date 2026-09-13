@@ -44,8 +44,9 @@ See `docs/FLEXIBILITY.md`, `docs/V9-NOTES.md`, `docs/MIGRATION.md`, `docs/ADMIN-
 2. Copy `.env.example` to `.env`.
 3. Add the real Sanity project ID to both project-ID variables.
 4. Run `npx sanity login` once.
-5. Restart `npm run dev` and open `/admin`.
-6. Add local and production origins to Sanity CORS before deployment.
+5. Run `npm run cms:dev` to open the local Sanity Studio GUI (normally `http://localhost:3333`).
+6. Run `npm run cms:deploy` when you are ready to host the GUI on Sanity.
+7. Put the resulting Studio URL in `PUBLIC_SANITY_STUDIO_URL` for the deployed Astro site so `/admin` redirects there.
 
 Seed or safely update the core studio/program structure:
 
@@ -103,6 +104,12 @@ npm run build
 Output: `dist/`
 
 
-## v10 visual refresh
+## v11 deployment workflow
 
-v10 adds a more colorful creative-studio visual system while preserving the art-first gallery. It also aligns the embedded Studio configuration with the current `@sanity/astro` routing model. After running migration scripts, use `npm run dev` to serve both the public site and the embedded Studio locally; `/admin` exists on that local Astro server and, later, on the deployed revamp.
+v11 treats the public Astro site and Sanity Studio as separate deployments. The public site remains static and fast; the Studio is hosted by Sanity. `/admin` is a small redirect page controlled by `PUBLIC_SANITY_STUDIO_URL`.
+
+Cloudflare configuration is stored in `wrangler.jsonc`. Content publishing can trigger automatic static rebuilds using a Cloudflare Workers Deploy Hook connected to a Sanity document webhook. See `docs/DEPLOYMENT.md`.
+
+### Mobile layout
+
+v11 increases mobile gutters to 24px, applies the same gutters to full-width gallery/tuition/faculty sections, clips decorative overflow, and switches the artwork gallery to one column on narrow phones so images and recognition media do not press against the viewport edges.

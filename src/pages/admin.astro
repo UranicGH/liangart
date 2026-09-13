@@ -1,0 +1,33 @@
+---
+import '../styles/global.css';
+
+const studioUrl = import.meta.env.PUBLIC_SANITY_STUDIO_URL || '';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Liang Art Studio Admin</title>
+    {studioUrl && <meta http-equiv="refresh" content={`0;url=${studioUrl}`} />}
+  </head>
+  <body>
+    <main class="section-pad" style="min-height:70vh;display:grid;place-content:center;max-width:760px">
+      {studioUrl ? (
+        <>
+          <p class="eyebrow">Administration</p>
+          <h1 style="font-size:clamp(2.2rem,6vw,4rem)">Opening the Liang Art Studio CMS…</h1>
+          <p>If you are not redirected, <a class="text-link" href={studioUrl}>open Sanity Studio</a>.</p>
+          <script define:vars={{ studioUrl }}>window.location.replace(studioUrl);</script>
+        </>
+      ) : (
+        <>
+          <p class="eyebrow">Administration</p>
+          <h1 style="font-size:clamp(2.2rem,6vw,4rem)">CMS URL not configured</h1>
+          <p>Set <code>PUBLIC_SANITY_STUDIO_URL</code> in the deployment build variables after deploying Sanity Studio.</p>
+        </>
+      )}
+    </main>
+  </body>
+</html>
