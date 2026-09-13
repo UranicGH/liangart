@@ -1,14 +1,20 @@
-# Liang Art Studio — Astro + Sanity revamp (v9)
+## v13 gallery behavior
 
-A flexible website and CMS for Liang Art Studio. Content semantics live in Sanity; visual presentation lives in Astro/CSS, so the gallery can be redesigned later without re-importing the artwork database.
+- The four lead artworks on the homepage are selected randomly from all published student work on each page load. There is no auto-advancing timer, so the page remains calm while still feeling fresh on return visits and refreshes.
+- The full Student Gallery defaults to **Most recent**, using completion date first, completion year second, and Sanity creation date only as a fallback.
+- Visitors can also sort the gallery by **Oldest** or **Student A–Z**. Award status and age remain filters rather than duplicate sort options.
+
+# Liang Art Studio — Astro + Sanity revamp (v12)
+
+A flexible website and straightforward CMS for Liang Art Studio. Content lives in Sanity; visual presentation lives in Astro/CSS, so the site can keep changing without re-importing student work.
 
 ## Stack
 
 - Astro static frontend
-- Sanity Studio embedded at `/admin`
+- Sanity Studio as the browser-based CMS
 - Sanity Content Lake + image CDN
-- Cloudflare Pages-ready
-- Local demo fallback before Sanity is configured
+- Cloudflare Worker static deployment
+- Sanity → Cloudflare deploy hook for content-triggered rebuilds
 
 ## Run locally
 
@@ -18,98 +24,85 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:4321` for the public site and `http://localhost:4321/admin` for Sanity Studio.
+Public site: `http://localhost:4321`
 
-## Content model
+CMS:
 
-- **Student Work:** main artwork/thumbnail, optional animation URL, student, program, instructor(s), reusable category, medium/technique, completion date/year, optional public age/grade at completion, dimensions, approved description, optional artist statement, supporting student/process images, awards, homepage feature flag
-- **Student:** public display name, artwork/name permission, optional public portrait with separate permission, status, optional studio start year
-- **Student Work Category:** reusable categories administrators can add without code; prevents spelling variants from breaking gallery filters
-- **Competition / Award Program:** reusable competition records for consistent award names, URLs, organizers and aggregation
-- **Award:** placement, competition reference, division/category, level, date/year, result URL, primary certificate/award image, additional recognition media, and an explicit gallery-feature choice
-- **Program:** Studio Art, Animation, Spanish, or future programs; instructor(s), approved copy, typical age range, schedule summary, enrollment status, registration note, ordering, primary-program flag
-- **Instructor:** name, display order, optional approved biography/photo, credentials, teaching specialties
-- **Tuition:** separate current/archived rate sheets per program and term
-- **FAQ:** approved parent-facing questions/answers
-- **Testimonial:** approved quotes with publication permission
-- **Site Settings:** approved site copy, studio photo, WeChat QR, contact details, registration/maps links, hours, service areas, and optional SEO/share fields
+```bash
+npm run cms:dev
+```
 
-Public student portraits, per-work supporting photos, age, grade and award images have explicit public-display controls.
+Sanity Studio normally opens at `http://localhost:3333`.
 
-See `docs/FLEXIBILITY.md`, `docs/V9-NOTES.md`, `docs/MIGRATION.md`, `docs/ADMIN-GUIDE.md`, and `docs/DATA-SAFETY.md`.
+## Simple CMS workflow
+
+Yolanda's normal Studio navigation is intentionally short:
+
+- **Student Work** — upload/publish artwork or animation thumbnails
+- **Students** — student display name + optional portrait
+- **Tuition** — current tuition sheets
+- **Studio Setup** — programs, instructors, categories, competitions, FAQs and website information
+
+If a published field is filled in, the site treats it as intended to be public. v12 removes the separate permission/show checkboxes for student names, portraits, ages, grades, certificates, process photos, programs, categories and FAQs.
+
+The one artwork display toggle that remains is **Featured on Homepage**.
+
+### Student Work fields
+
+Only two fields are required:
+
+- artwork image
+- student
+
+Everything else can be added later:
+
+- title (blank becomes `Untitled`)
+- program (defaults to Studio Art)
+- category
+- age / grade when the work was completed
+- medium / technique
+- completion date or year
+- instructor(s)
+- dimensions
+- description / artist statement
+- student/process photos
+- awards and certificate images
+- animation/video URL
+- homepage feature toggle
+
+Published records can be edited at any time, so incomplete metadata is fine.
 
 ## Connect Sanity
 
-1. Create/sign into Sanity and create a project with a public `production` dataset.
-2. Copy `.env.example` to `.env`.
-3. Add the real Sanity project ID to both project-ID variables.
-4. Run `npx sanity login` once.
-5. Run `npm run cms:dev` to open the local Sanity Studio GUI (normally `http://localhost:3333`).
-6. Run `npm run cms:deploy` when you are ready to host the GUI on Sanity.
-7. Put the resulting Studio URL in `PUBLIC_SANITY_STUDIO_URL` for the deployed Astro site so `/admin` redirects there.
+1. Copy `.env.example` to `.env`.
+2. Add the real Sanity project ID/dataset.
+3. Run `npx sanity login` once.
+4. Run `npm run cms:dev` locally.
+5. Run `npx sanity@latest deploy --url <studio-hostname> --title "Liang Art Studio"` to host the GUI.
+6. Set `PUBLIC_SANITY_STUDIO_URL` locally and in Cloudflare so `/admin` redirects to the hosted Studio.
 
-Seed or safely update the core studio/program structure:
+Core studio records can be safely seeded/updated with:
 
 ```bash
 npm run seed:content
 ```
 
-## Optional demo Student Work
+## Existing gallery migration
 
-Core seeding intentionally does not create fake students or artwork. To evaluate the real CMS/gallery behavior:
+The legacy importer creates draft Studio Art records and uploads the old gallery images. Existing migrated records do **not** need to be re-imported for v12; old permission/show fields are simply ignored.
 
-```bash
-npm run seed:demo
-```
+See `docs/MIGRATION.md` and `docs/ADMIN-GUIDE.md`.
 
-The demo creates published records clearly labeled `[Demo]`, including Studio Art, Animation, ages, reusable categories/competitions, awards, a student portrait, a certificate image, and an animation video link.
-
-To reset the demo after updating versions:
-
-```bash
-npm run remove:demo
-npm run seed:demo
-```
-
-To remove demo content when finished:
-
-```bash
-npm run remove:demo
-```
-
-The cleanup targets explicit demo IDs only.
-
-## Existing site migration
-
-Put the old site under `legacy/` so its HTML is `legacy/index.html` and its artwork files are in `legacy/images/`. Then run:
-
-```bash
-npm run migrate:legacy
-```
-
-Run `npm run migrate:legacy:check` first for a no-write file audit. Each legacy image is then uploaded into a **draft Studio Art work record**. Student, reusable category, title, age, awards and other metadata remain for administrator review before publication.
-
-## Gallery interaction
-
-When approved media exists, gallery cards show a student portrait at the bottom-left and a larger certificate/award image at the bottom-right. Certificate previews preserve the uploaded image's natural aspect ratio rather than forcing every certificate into the same shape.
-
-On pointer/desktop devices, hovering the visual cluster gently enlarges the artwork while fading the supporting recognition media. On mobile, tapping a normal artwork opens the full artwork detail viewer, which provides the clearest useful form of enlargement on a touch interface.
-
-## Build
+## Build / deployment
 
 ```bash
 npm run build
 ```
 
-Output: `dist/`
+Output: `dist/`.
 
+Cloudflare deployment configuration is stored in `wrangler.jsonc`. The public site is static, so Sanity publishing should trigger a Cloudflare rebuild through a Deploy Hook/webhook pair.
 
-## v11 deployment workflow
+## Mobile layout
 
-v11 treats the public Astro site and Sanity Studio as separate deployments. The public site remains static and fast; the Studio is hosted by Sanity. `/admin` is a small redirect page controlled by `PUBLIC_SANITY_STUDIO_URL`.
-
-Cloudflare configuration is stored in `wrangler.jsonc`. Content publishing can trigger automatic static rebuilds using a Cloudflare Workers Deploy Hook connected to a Sanity document webhook. See `docs/DEPLOYMENT.md`.
-
-### Mobile layout
-
-v11 increases mobile gutters to 24px, applies the same gutters to full-width gallery/tuition/faculty sections, clips decorative overflow, and switches the artwork gallery to one column on narrow phones so images and recognition media do not press against the viewport edges.
+v12 uses one shared responsive gutter across the header, homepage Student Gallery, homepage Tuition, faculty section and footer. Full-width colored/background sections keep their visual treatment while their contents remain inset and centered on phones.

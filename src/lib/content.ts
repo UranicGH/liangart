@@ -11,7 +11,6 @@ export type Award = {
   url?: string;
   notes?: string;
   certificateImage?: string;
-  featuredInGallery?: boolean;
   additionalMedia?: Array<{ image: string; kind?: string; caption?: string }>;
 };
 
@@ -69,6 +68,8 @@ export type Artwork = {
   studentPhoto?: string;
   studentContextImages?: Array<{ image: string; caption?: string }>;
   awards: Award[];
+  createdAt?: string;
+  sortDate?: number;
 };
 
 export type SiteSettings = {
@@ -116,20 +117,12 @@ export type Faq = {
   displayOrder?: number;
 };
 
-export type Testimonial = {
-  id: string;
-  quote: string;
-  attribution: string;
-  program?: string;
-  featured?: boolean;
-  displayOrder?: number;
-};
-
-const artworkQuery = `*[_type == "artwork" && showOnWebsite != false && defined(image.asset) && student->permissionToPublish == true] | order(coalesce(displayOrder, 9999) asc, artworkDate desc, _createdAt desc) {
+const artworkQuery = `*[_type == "artwork" && defined(image.asset) && defined(student->displayName)] | order(artworkDate desc, _createdAt desc) {
   "id": _id,
-  title,
+  "createdAt": _createdAt,
+  "title": coalesce(title, "Untitled"),
   "student": student->displayName,
-  "studentPhoto": select(student->photoPermissionToPublish == true => student->photo, null),
+  "studentPhoto": student->photo,
   "program": program->name,
   "programSlug": program->slug.current,
   "instructors": instructors[]->name,
@@ -142,49 +135,62 @@ const artworkQuery = `*[_type == "artwork" && showOnWebsite != false && defined(
   artistStatement,
   videoUrl,
   featured,
-  "ageAtCompletion": select(showAgePublicly == true => ageAtCompletion, null),
-  "gradeAtCompletion": select(showGradePublicly == true => gradeAtCompletion, null),
+  ageAtCompletion,
+  gradeAtCompletion,
   dimensions,
-  "studentContextImages": studentContextImages[approvedForPublication == true]{image, caption},
+  "studentContextImages": studentContextImages[]{image, caption},
   image,
   "alt": image.alt,
   awards[]{
     "competition": coalesce(competition->name, competitionNameOverride),
     awardName,
-    featuredInGallery,
     division,
     level,
     year,
     date,
     "url": coalesce(url, competition->website),
     notes,
-    "certificateImage": select(certificateApprovedForPublication == true => certificateImage, null),
-    "additionalMedia": additionalAwardMedia[approvedForPublication == true]{image, kind, caption}
+    certificateImage,
+    "additionalMedia": additionalAwardMedia[]{image, kind, caption}
   }
 }`;
 
 export async function getArtwork(): Promise<Artwork[]> {
   if (!sanityConfigured || !client) return demoArtwork;
   const rows = await client.fetch<any[]>(artworkQuery);
-  return rows.map((row) => ({
-    ...row,
-    image: sanityImageUrl(row.image, 900),
-    imageLarge: sanityImageUrl(row.image, 1800),
-    studentPhoto: row.studentPhoto ? sanityImageUrl(row.studentPhoto, 500) : undefined,
-    studentContextImages: (row.studentContextImages || []).map((item: any) => ({
-      ...item,
-      image: item.image ? sanityImageUrl(item.image, 900) : undefined,
-    })).filter((item: any) => item.image),
-    alt: row.alt || `${row.title} by ${row.student}`,
-    awards: (row.awards || []).map((award: any) => ({
-      ...award,
-      certificateImage: award.certificateImage ? sanityImageUrl(award.certificateImage, 1200) : undefined,
-      additionalMedia: (award.additionalMedia || []).map((item: any) => ({
+  const mapped = rows.map((row) => {
+    const exactDate = row.artworkDate ? Date.parse(row.artworkDate) : Number.NaN;
+    const yearDate = row.year ? Date.UTC(Number(row.year), 11, 31) : Number.NaN;
+    const createdDate = row.createdAt ? Date.parse(row.createdAt) : 0;
+    const sortDate = Number.isFinite(exactDate)
+      ? exactDate
+      : Number.isFinite(yearDate)
+        ? yearDate
+        : createdDate;
+
+    return {
+      ...row,
+      sortDate,
+      image: sanityImageUrl(row.image, 900),
+      imageLarge: sanityImageUrl(row.image, 1800),
+      studentPhoto: row.studentPhoto ? sanityImageUrl(row.studentPhoto, 500) : undefined,
+      studentContextImages: (row.studentContextImages || []).map((item: any) => ({
         ...item,
-        image: item.image ? sanityImageUrl(item.image, 1200) : undefined,
+        image: item.image ? sanityImageUrl(item.image, 900) : undefined,
       })).filter((item: any) => item.image),
-    })),
-  }));
+      alt: row.alt || `${row.title} by ${row.student}`,
+      awards: (row.awards || []).map((award: any) => ({
+        ...award,
+        certificateImage: award.certificateImage ? sanityImageUrl(award.certificateImage, 1200) : undefined,
+        additionalMedia: (award.additionalMedia || []).map((item: any) => ({
+          ...item,
+          image: item.image ? sanityImageUrl(item.image, 1200) : undefined,
+        })).filter((item: any) => item.image),
+      })),
+    };
+  });
+
+  return mapped.sort((a, b) => (b.sortDate || 0) - (a.sortDate || 0));
 }
 
 export async function getFeaturedArtwork(limit = 6) {
@@ -195,7 +201,7 @@ export async function getFeaturedArtwork(limit = 6) {
 
 export async function getPrograms(): Promise<Program[]> {
   if (!sanityConfigured || !client) return demoPrograms;
-  const rows = await client.fetch<any[]>(`*[_type == "program" && showOnWebsite != false] | order(coalesce(displayOrder, 9999) asc, name asc) {
+  const rows = await client.fetch<any[]>(`*[_type == "program"] | order(coalesce(displayOrder, 9999) asc, name asc) {
     "id": _id,
     name,
     "slug": slug.current,
@@ -262,23 +268,11 @@ export async function getPrimaryTuition(): Promise<TuitionSheet> {
 
 export async function getFaqs(): Promise<Faq[]> {
   if (!sanityConfigured || !client) return [];
-  return client.fetch<Faq[]>(`*[_type == "faq" && showOnWebsite != false] | order(coalesce(displayOrder, 9999) asc, question asc) {
+  return client.fetch<Faq[]>(`*[_type == "faq"] | order(coalesce(displayOrder, 9999) asc, question asc) {
     "id": _id,
     question,
     answer,
     category,
-    displayOrder
-  }`);
-}
-
-export async function getFeaturedTestimonials(): Promise<Testimonial[]> {
-  if (!sanityConfigured || !client) return [];
-  return client.fetch<Testimonial[]>(`*[_type == "testimonial" && permissionToPublish == true && featured == true] | order(coalesce(displayOrder, 9999) asc) {
-    "id": _id,
-    quote,
-    attribution,
-    "program": program->name,
-    featured,
     displayOrder
   }`);
 }

@@ -19,7 +19,6 @@ export const program = defineType({
     defineField({ name: 'enrollmentStatus', title: 'Enrollment Status', type: 'string', options: { list: ['Accepting students', 'Limited availability', 'Waitlist', 'Not currently enrolling'] }, description: 'Optional. Useful for parents deciding whether to contact the studio.' }),
     defineField({ name: 'registrationNote', title: 'Registration Note', type: 'string', description: 'Optional approved note such as trial-class or registration instructions.' }),
     defineField({ name: 'featuredImage', title: 'Program Image', type: 'image', options: { hotspot: true } }),
-    defineField({ name: 'showOnWebsite', title: 'Show on Website', type: 'boolean', initialValue: true }),
   ],
   orderings: [{ title: 'Display order', name: 'displayOrder', by: [{ field: 'displayOrder', direction: 'asc' }] }],
   preview: {

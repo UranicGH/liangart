@@ -15,7 +15,7 @@ export const competition = defineType({
       options: { list: ['Studio', 'Local', 'County', 'Regional', 'State', 'National', 'International'] },
       description: 'Optional default context. Individual awards can still specify their own level.',
     }),
-    defineField({ name: 'logo', title: 'Logo / Mark', type: 'image', options: { hotspot: true }, description: 'Optional. Only upload if the studio has permission to display it.' }),
+    defineField({ name: 'logo', title: 'Logo / Mark', type: 'image', options: { hotspot: true }, description: 'Optional competition logo or mark.' }),
     defineField({ name: 'notes', title: 'Internal Notes', type: 'text', rows: 3, description: 'Keep this non-sensitive. The production dataset is configured for public reads.' }),
   ],
   orderings: [{ title: 'Name', name: 'name', by: [{ field: 'name', direction: 'asc' }] }],

@@ -60,10 +60,8 @@ for (let i = 0; i < filenames.length; i += 1) {
       title: `[Draft] Untitled — ${filename}`,
       program: { _type: 'reference', _ref: 'program-studio-art' },
       image: { _type: 'image', asset: { _type: 'reference', _ref: asset._id } },
-      showOnWebsite: true,
       featured: false,
       legacyFilename: filename,
-      needsMetadataReview: true,
     });
     console.log(`[${i + 1}/${filenames.length}] uploaded ${filename}`);
   } finally {

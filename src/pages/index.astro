@@ -4,15 +4,21 @@ import ArtworkCard from '../components/ArtworkCard.astro';
 import ArtworkLightbox from '../components/ArtworkLightbox.astro';
 import ProgramCard from '../components/ProgramCard.astro';
 import TuitionCards from '../components/TuitionCards.astro';
-import { getFeaturedArtwork, getPrograms, getSiteSettings, getPrimaryTuition, getFeaturedTestimonials } from '../lib/content';
+import { getArtwork, getPrograms, getSiteSettings, getPrimaryTuition } from '../lib/content';
 
-const [artwork, programs, settings, tuition, testimonials] = await Promise.all([
-  getFeaturedArtwork(6),
+const [allArtwork, programs, settings, tuition] = await Promise.all([
+  getArtwork(),
   getPrograms(),
   getSiteSettings(),
   getPrimaryTuition(),
-  getFeaturedTestimonials(),
 ]);
+const featuredArtwork = allArtwork.filter((item) => item.featured);
+const artwork = (featuredArtwork.length ? featuredArtwork : allArtwork).slice(0, 6);
+const heroFallback = allArtwork.slice(0, 4);
+const heroPoolJson = JSON.stringify(allArtwork.map((item) => ({
+  image: item.image,
+  alt: item.alt || `${item.title} by ${item.student}`,
+}))).replace(/</g, '\\u003c');
 const primaryProgram = programs.find((program) => program.primaryProgram) || programs[0];
 const secondaryPrograms = programs.filter((program) => program.id !== primaryProgram?.id);
 ---
@@ -26,11 +32,12 @@ const secondaryPrograms = programs.filter((program) => program.id !== primaryPro
         <a class="button secondary" href="/tuition">Tuition Rates</a>
       </div>
     </div>
-    <div class="home-art-grid" aria-label="Featured student artwork">
-      {artwork.slice(0, 4).map((item, index) => (
-        <img class={`home-art home-art-${index + 1}`} src={item.image} alt={item.alt || item.title} />
+    <div class="home-art-grid" aria-label="Student artwork spotlight">
+      {heroFallback.map((item, index) => (
+        <img class={`home-art home-art-${index + 1}`} data-home-art src={item.image} alt={item.alt || item.title} />
       ))}
     </div>
+    <script is:inline id="home-art-pool" type="application/json" set:html={heroPoolJson}></script>
   </section>
 
   <section class="section-pad gallery-feature">
@@ -58,24 +65,32 @@ const secondaryPrograms = programs.filter((program) => program.id !== primaryPro
     </div>
   </section>
 
-  {testimonials.length > 0 && (
-    <section class="section-pad testimonial-section">
-      <div class="section-heading">
-        <p class="eyebrow">Families</p>
-        <h2>Testimonials</h2>
-      </div>
-      <div class="testimonial-grid">
-        {testimonials.map((item) => (
-          <blockquote class="testimonial-card">
-            <p>“{item.quote}”</p>
-            <footer>{item.attribution}{item.program ? ` · ${item.program}` : ''}</footer>
-          </blockquote>
-        ))}
-      </div>
-    </section>
-  )}
+
 
   <ArtworkLightbox />
+
+  <script>
+    const poolNode = document.querySelector('#home-art-pool');
+    const heroImages = [...document.querySelectorAll('[data-home-art]')];
+
+    if (poolNode && heroImages.length) {
+      try {
+        const pool = JSON.parse(poolNode.textContent || '[]');
+        for (let i = pool.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [pool[i], pool[j]] = [pool[j], pool[i]];
+        }
+        heroImages.forEach((image, index) => {
+          const item = pool[index];
+          if (!item) return;
+          image.setAttribute('src', item.image);
+          image.setAttribute('alt', item.alt || 'Student artwork');
+        });
+      } catch (error) {
+        console.warn('Unable to rotate homepage artwork.', error);
+      }
+    }
+  </script>
 
   <section class="tuition-section section-pad">
     <div class="section-heading split-heading">

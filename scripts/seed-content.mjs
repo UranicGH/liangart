@@ -29,7 +29,6 @@ const documents = [
     primaryProgram: true,
     displayOrder: 1,
     summary: 'Learn how to draw from a professional.',
-    showOnWebsite: true,
   },
   {
     _id: 'program-animation',
@@ -41,7 +40,6 @@ const documents = [
     primaryProgram: false,
     displayOrder: 2,
     summary: '[Draft] Class details, schedule, age range, and tuition information will be added here.',
-    showOnWebsite: true,
   },
   {
     _id: 'program-spanish',
@@ -53,7 +51,6 @@ const documents = [
     primaryProgram: false,
     displayOrder: 3,
     summary: '[Draft] Class details, schedule, age range, and tuition information will be added here.',
-    showOnWebsite: true,
   },
   {
     _id: 'siteSettings',

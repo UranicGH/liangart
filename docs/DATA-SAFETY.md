@@ -11,7 +11,6 @@ The current Sanity project is designed to work on Sanity's free plan, which uses
 - artwork title, medium, dimensions and date/year
 - awards, certificates and result URLs after review
 - instructor/program/tuition/site information
-- simple publication-permission switches
 
 ## Do not store here
 

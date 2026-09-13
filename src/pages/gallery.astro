@@ -50,7 +50,17 @@ const hasAges = artwork.some((item) => typeof item.ageAtCompletion === 'number')
         {categories.map((category, index) => <button class:list={{ 'filter-chip': true, active: index === 0 }} data-category-filter={category}>{category}</button>)}
       </div>
     </div>
-    <p id="gallery-count" class="gallery-count">Showing {artwork.length} works</p>
+    <div class="gallery-toolbar">
+      <p id="gallery-count" class="gallery-count">Showing {artwork.length} works</p>
+      <label class="gallery-sort">
+        <span>Sort</span>
+        <select id="gallery-sort" aria-label="Sort student work">
+          <option value="recent">Most recent</option>
+          <option value="oldest">Oldest</option>
+          <option value="student">Student A–Z</option>
+        </select>
+      </label>
+    </div>
     <div id="gallery-grid" class="masonry-grid">
       {artwork.map((item) => <ArtworkCard artwork={item} lightbox={true} />)}
     </div>
@@ -59,16 +69,32 @@ const hasAges = artwork.some((item) => typeof item.ageAtCompletion === 'number')
   <ArtworkLightbox />
 
   <script>
-    const programChips = [...document.querySelectorAll('[data-program-filter]')];
-    const categoryChips = [...document.querySelectorAll('[data-category-filter]')];
-    const awardChips = [...document.querySelectorAll('[data-award-filter]')];
-    const ageChips = [...document.querySelectorAll('[data-age-filter]')];
-    const cards = [...document.querySelectorAll('.art-card')];
-    const count = document.querySelector('#gallery-count');
+    const programChips = [...document.querySelectorAll<HTMLButtonElement>('[data-program-filter]')];
+    const categoryChips = [...document.querySelectorAll<HTMLButtonElement>('[data-category-filter]')];
+    const awardChips = [...document.querySelectorAll<HTMLButtonElement>('[data-award-filter]')];
+    const ageChips = [...document.querySelectorAll<HTMLButtonElement>('[data-age-filter]')];
+    const cards = [...document.querySelectorAll<HTMLElement>('.art-card')];
+    const count = document.querySelector<HTMLElement>('#gallery-count');
+    const grid = document.querySelector<HTMLElement>('#gallery-grid');
+    const sortSelect = document.querySelector<HTMLSelectElement>('#gallery-sort');
     let programFilter = 'All';
     let categoryFilter = 'All';
     let awardFilter = 'All';
     let ageFilter = 'All';
+
+    const sortCards = () => {
+      if (!grid || !sortSelect) return;
+      const mode = sortSelect.value;
+      const sorted = [...cards].sort((a, b) => {
+        if (mode === 'student') {
+          return (a.getAttribute('data-student') || '').localeCompare(b.getAttribute('data-student') || '', undefined, { sensitivity: 'base' });
+        }
+        const aDate = Number(a.getAttribute('data-sort-date') || 0);
+        const bDate = Number(b.getAttribute('data-sort-date') || 0);
+        return mode === 'oldest' ? aDate - bDate : bDate - aDate;
+      });
+      sorted.forEach((card) => grid.appendChild(card));
+    };
 
     const applyFilters = () => {
       let visible = 0;
@@ -113,6 +139,8 @@ const hasAges = artwork.some((item) => typeof item.ageAtCompletion === 'number')
       ageFilter = chip.getAttribute('data-age-filter') || 'All';
       applyFilters();
     }));
+    sortSelect?.addEventListener('change', sortCards);
+    sortCards();
 
   </script>
 </BaseLayout>

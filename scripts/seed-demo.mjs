@@ -61,7 +61,6 @@ for (const category of DEMO_CATEGORIES) {
     slug: { _type: 'slug', current: category.slug },
     program: { _type: 'reference', _ref: category.program },
     displayOrder: category.displayOrder,
-    showOnWebsite: true,
   });
   console.log(`CREATE ${category.id}`);
 }
@@ -121,12 +120,7 @@ for (const student of DEMO_STUDENTS) {
     _id: student.id,
     _type: 'student',
     displayName: student.displayName,
-    permissionToPublish: true,
     photo: imageRef(photo, `${student.displayName} demo portrait placeholder`),
-    photoPermissionToPublish: true,
-    status: student.status,
-    studioStartYear: 2024,
-    bio: '[Demo] Optional approved public student note would appear here.',
   });
   console.log(`CREATE ${student.id}`);
 }
@@ -248,13 +242,10 @@ for (const work of DEMO_WORKS) {
         _type: 'award',
         competition: { _type: 'reference', _ref: work.award.competition },
         awardName: work.award.awardName,
-        featuredInGallery: true,
         division: work.award.division,
         level: work.award.level,
         year: work.award.year,
         certificateImage: certificateAsset ? imageRef(certificateAsset, `${work.award.awardName} demo certificate placeholder`) : undefined,
-        certificateApprovedForPublication: Boolean(certificateAsset),
-        notes: '[Demo] Optional internal/public award notes can be entered here.',
       }]
     : [];
 
@@ -271,16 +262,13 @@ for (const work of DEMO_WORKS) {
     artworkDate: work.artworkDate,
     year: work.year,
     ageAtCompletion: work.ageAtCompletion,
-    showAgePublicly: true,
     gradeAtCompletion: work.gradeAtCompletion,
-    showGradePublicly: true,
     dimensions: work.dimensions,
     featured: work.featured,
-    displayOrder: work.displayOrder,
     description: work.description,
     artistStatement: work.artistStatement,
     videoUrl: work.videoUrl,
-    studentContextImages: contextAsset ? [{ _key: 'demo-context-1', _type: 'object', image: imageRef(contextAsset, `${work.title} demo supporting image`), caption: work.contextCaption, approvedForPublication: true }] : [],
+    studentContextImages: contextAsset ? [{ _key: 'demo-context-1', _type: 'object', image: imageRef(contextAsset, `${work.title} demo supporting image`), caption: work.contextCaption }] : [],
     awards,
   });
   console.log(`CREATE ${work.id}`);

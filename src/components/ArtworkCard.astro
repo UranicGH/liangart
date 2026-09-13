@@ -1,8 +1,8 @@
 ---
 import type { Artwork } from '../lib/content';
 const { artwork, lightbox = false } = Astro.props as { artwork: Artwork; lightbox?: boolean };
-const award = artwork.awards?.find((item) => item.featuredInGallery) || artwork.awards?.[0];
-const galleryAward = artwork.awards?.find((item) => item.featuredInGallery && item.certificateImage) || artwork.awards?.find((item) => item.certificateImage);
+const award = artwork.awards?.[0];
+const galleryAward = artwork.awards?.find((item) => item.certificateImage);
 const galleryCertificate = galleryAward?.certificateImage;
 const hasGallerySupportingMedia = Boolean(artwork.studentPhoto || galleryCertificate);
 const dimensions = artwork.dimensions?.width && artwork.dimensions?.height
@@ -13,7 +13,7 @@ const studentMedia = [
   ...(artwork.studentContextImages || []).map((item) => ({ src: item.image, label: item.caption || 'Student / process photo' })),
 ].filter(Boolean) as Array<{ src: string; label: string }>;
 ---
-<article class="art-card" data-category={artwork.category} data-program={artwork.program || ''} data-award={award ? 'true' : 'false'} data-year={artwork.year || ''} data-age={artwork.ageAtCompletion || ''}>
+<article class="art-card" data-category={artwork.category} data-program={artwork.program || ''} data-award={award ? 'true' : 'false'} data-year={artwork.year || ''} data-age={artwork.ageAtCompletion || ''} data-sort-date={artwork.sortDate || 0} data-student={artwork.student}>
   <div class:list={{ 'art-visual-cluster': true, 'has-supporting-media': hasGallerySupportingMedia }}>
     {artwork.videoUrl ? (
       <a class="art-image-wrap is-video-link" href={artwork.videoUrl} target="_blank" rel="noreferrer" aria-label={`View ${artwork.title} animation`}>

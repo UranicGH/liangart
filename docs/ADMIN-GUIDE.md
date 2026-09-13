@@ -1,67 +1,58 @@
-# Liang Art Studio — Admin guide
+# Liang Art Studio — simple administrator guide
 
-This guide is written for a studio administrator who does **not** need access to the website code.
+This workflow is designed for an administrator who does not use the website code.
 
 ## Where to edit
 
-When the website is deployed, open:
+Open the hosted Sanity Studio (eventually available through `https://liangartstudio.com/admin`) and sign in.
 
-```text
-https://liangartstudio.com/admin
-```
+The main menu contains:
 
-Sign in with the Sanity account that has been invited to the Liang Art Studio project.
+1. **Student Work**
+2. **Students**
+3. **Tuition**
+4. **Studio Setup**
 
-## Adding a new student work
+Most routine updates only use the first three.
 
-1. Open **Student Work → All Student Work**.
-2. Click **Create** and choose **Student Work**.
-3. In **1. Basics**:
-   - upload the artwork/animation thumbnail;
-   - enter the work title;
-   - choose the student;
-   - choose the program (Studio Art or Animation);
-   - choose the category;
-   - leave **Show on Website** on unless the record should remain hidden;
+## Add a student work
+
+1. Open **Student Work** and click **Create**.
+2. In **1. Artwork**:
+   - upload the artwork or animation thumbnail;
+   - choose the student (or create a student from the reference field);
+   - add a title if the work has one;
+   - confirm the program (Studio Art is the default);
+   - optionally choose/create a category;
    - optionally turn on **Featured on Homepage**.
-4. In **2. Student & Photos**:
-   - add age/grade at completion if known;
-   - turn on the separate public-display switches only when approved;
-   - add optional process/recognition photos and approve individual images for publication.
-5. In **3. Awards**:
+3. In **2. Student & Photos**:
+   - add age and/or grade when completed if known;
+   - add extra student/process photos if desired.
+4. In **3. Awards**:
    - add the competition, award/placement, division, level and year when known;
-   - upload the certificate/award image;
-   - enable **Publish Primary Award Image** only after checking the image for information that should not be public;
-   - if there are multiple awards, mark the one that should represent the work on the gallery card.
-6. In **4. Optional Details**, add medium, completion date/year, dimensions, class/section, description, artist statement or animation/video URL when available.
-7. Click **Publish** when ready.
+   - upload the certificate/award image if available;
+   - add other award/ceremony images if useful.
+5. In **4. More Details**, optionally add medium, date/year, dimensions, class, instructor, description, artist statement, or animation/video URL.
+6. Click **Publish**.
 
-You can publish a record and come back to add optional information later. Changes made later do not require touching the website code.
-
-## Imported work
-
-Legacy imports appear first under **Student Work → Needs Metadata Review**. It is fine to fill them out gradually.
-
-For an imported work:
-
-1. open the record;
-2. replace the `[Draft]` title;
-3. choose/create the student and confirm the student's publication permission;
-4. choose a category;
-5. add whatever other information is currently available;
-6. turn off **Needs Metadata Review** when the basic record has been checked;
-7. publish when it is appropriate for the public gallery.
-
-Unknown optional information can remain blank and be added later.
-
-## Hiding something without deleting it
-
-Use **Show on Website** on the Student Work record. Turning it off keeps the record in Sanity while removing it from the public gallery after the site refreshes/rebuilds.
+If a value is unknown, leave it blank. You can return and add it later even after publication.
 
 ## Students
 
-A Student record stores a **public display name**, not necessarily a legal name. The artwork/name permission and portrait permission are separate switches.
+A Student record only needs the name that should appear on the website. Add an optional portrait if you want it displayed beside the student's work.
+
+## Awards and certificates
+
+Awards are entered directly inside a Student Work record. If multiple awards exist, put the most important one first; the first award that has a certificate image is used as the gallery-card certificate thumbnail.
 
 ## Categories and competitions
 
-Before creating a new category or competition, search the existing list first. Reusing the same record keeps filters and award counts consistent.
+These live under **Studio Setup**. Reuse an existing category/competition when possible so gallery filters and award names remain consistent. You can also create a new one directly from the reference field while editing Student Work.
+
+## Tuition
+
+Open **Tuition**, update the current term/prices, and publish. Older rate sheets can remain in Sanity for reference by turning off **Current Tuition**.
+
+## Important rule
+
+The CMS is now intentionally simple: if you upload information into a published document, the website assumes you intend it to be displayed. Do not upload private student information, signed forms, parent contact details, dates of birth, payment information, or anything that should remain confidential.

@@ -566,3 +566,87 @@ h2 { font-size: clamp(2.05rem, 3.5vw, 3.25rem); line-height: 1.02; }
 @media (prefers-reduced-motion: reduce) {
   .program-card, .filter-chip, .button { transition: none !important; transform: none !important; }
 }
+
+/* v12: consistent responsive gutters. Full-width homepage sections keep their backgrounds,
+   while their content stays comfortably inset on phones and centered on large screens. */
+:root {
+  --site-gutter: max(5vw, calc((100vw - 1240px) / 2));
+  --page: min(1240px, calc(100vw - (2 * var(--site-gutter))));
+}
+
+.site-header { padding-left: var(--site-gutter); padding-right: var(--site-gutter); }
+.gallery-feature,
+.tuition-section,
+.faculty-section {
+  padding-left: var(--site-gutter);
+  padding-right: var(--site-gutter);
+}
+.gallery-feature > *,
+.tuition-section > *,
+.faculty-section > * {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.gallery-feature::before {
+  margin-left: calc(-1 * var(--site-gutter));
+  margin-right: calc(-1 * var(--site-gutter));
+}
+
+@media (max-width: 720px) {
+  :root {
+    --site-gutter: clamp(1.35rem, 6.5vw, 1.8rem);
+    --page: calc(100vw - (2 * var(--site-gutter)));
+  }
+
+  .site-header { padding-left: var(--site-gutter); padding-right: var(--site-gutter); }
+  .gallery-feature,
+  .tuition-section,
+  .faculty-section { padding-left: var(--site-gutter); padding-right: var(--site-gutter); }
+  .gallery-feature::before {
+    margin-left: calc(-1 * var(--site-gutter));
+    margin-right: calc(-1 * var(--site-gutter));
+  }
+  .site-footer { width: var(--page); }
+  .nav { width: var(--page); }
+
+  /* Prevent transformed/decorative artwork elements from visually touching the viewport edge. */
+  .featured-grid,
+  .tuition-grid { width: 100%; min-width: 0; }
+  .art-card,
+  .tuition-card { min-width: 0; }
+}
+
+@media (max-width: 420px) {
+  :root { --site-gutter: 1.35rem; }
+}
+
+
+/* v13: rotating homepage artwork + simple, useful gallery sorting. */
+.gallery-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.35rem 0 1.15rem;
+}
+.gallery-toolbar .gallery-count { margin: 0; }
+.gallery-sort { display: inline-flex; align-items: center; gap: .55rem; color: var(--muted); font-size: .72rem; font-weight: 700; }
+.gallery-sort select {
+  min-width: 150px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,255,255,.78);
+  color: var(--ink);
+  padding: .55rem 2rem .55rem .8rem;
+  font: inherit;
+  cursor: pointer;
+}
+.gallery-sort select:focus-visible { outline: 3px solid rgba(73,104,169,.2); outline-offset: 2px; }
+#home-art-pool { display: none; }
+@media (max-width: 560px) {
+  .gallery-toolbar { align-items: flex-start; flex-direction: column; }
+  .gallery-sort { width: 100%; justify-content: space-between; }
+  .gallery-sort select { flex: 1; max-width: 220px; }
+}
